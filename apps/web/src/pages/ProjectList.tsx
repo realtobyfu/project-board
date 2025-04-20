@@ -155,61 +155,112 @@ const ProjectList: React.FC = () => {
     return !!user && project.user_id === user.id;
   };
 
+  // Icon SVGs
+  const plusIcon = (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className="h-5 w-5"
+      viewBox="0 0 20 20"
+      fill="currentColor"
+    >
+      <path
+        fillRule="evenodd"
+        d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Projects</h1>
-        {user && (
-          <Button
-            onClick={() => {
-              setEditingProject(null);
-              setIsModalOpen(true);
-              navigate('/projects/new');
-            }}
-          >
-            Create Project
-          </Button>
-        )}
+    <div className="pb-20">
+      {/* Hero section with decorative elements */}
+      <div className="relative mb-12 overflow-hidden">
+        <div className="absolute -right-10 -top-24 w-72 h-72 bg-neon-300 rounded-full filter blur-3xl opacity-20 animate-pulse-slow"></div>
+        <div className="absolute -left-20 top-10 w-72 h-72 bg-midnight-800 rounded-full filter blur-3xl opacity-10 animate-pulse-slow"></div>
+
+        <div className="relative z-10 flex justify-between items-center py-10">
+          <div>
+            <h1 className="text-4xl font-bold text-midnight-900 font-display">Discover Projects</h1>
+            <p className="mt-2 text-midnight-600 max-w-2xl">
+              Find exciting collaborations or post your own project ideas to build your team.
+            </p>
+          </div>
+
+          {user && (
+            <Button
+              onClick={() => {
+                setEditingProject(null);
+                setIsModalOpen(true);
+                navigate('/projects/new');
+              }}
+              variant="neon"
+              size="lg"
+              icon={plusIcon}
+              className="ml-4"
+            >
+              Create Project
+            </Button>
+          )}
+        </div>
       </div>
 
-      <div className="mb-6">
-        <h2 className="text-lg font-medium mb-2">Filter by skills:</h2>
-        <div className="flex flex-wrap">
+      {/* Skills filter section with modern styling */}
+      <div className="mb-10 p-6 bg-white rounded-2xl shadow-card border border-gray-100">
+        <h2 className="text-lg font-medium mb-4 text-midnight-800">
+          <span className="inline-block w-2 h-2 rounded-full bg-neon-400 mr-2"></span>
+          Filter by skills
+        </h2>
+        <div className="flex flex-wrap gap-2">
           {skills.map(skill => (
             <div
               key={skill}
               onClick={() => toggleSkillFilter(skill)}
-              className={`cursor-pointer m-1 ${
-                selectedSkills.includes(skill) ? 'ring-2 ring-blue-500' : ''
-              }`}
+              className="relative cursor-pointer transition-transform hover:scale-105"
             >
               <Badge
                 text={skill}
-                color={selectedSkills.includes(skill) ? 'primary' : 'secondary'}
+                color={selectedSkills.includes(skill) ? 'neon' : 'primary'}
+                variant={selectedSkills.includes(skill) ? 'solid' : 'outline'}
               />
+              {selectedSkills.includes(skill) && (
+                <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-neon-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-neon-500"></span>
+                </span>
+              )}
             </div>
           ))}
         </div>
       </div>
 
+      {/* Projects grid with modern card design */}
       {isLoading ? (
-        <p className="text-center py-8">Loading projects...</p>
+        <div className="flex flex-col items-center justify-center py-16">
+          <div className="w-16 h-16 border-4 border-midnight-100 border-t-neon-400 rounded-full animate-spin mb-4"></div>
+          <p className="text-midnight-600">Loading amazing projects...</p>
+        </div>
       ) : filteredProjects.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredProjects.map(project => (
-            <div key={project.id}>
+            <div
+              key={project.id}
+              className="transform transition-all duration-300 hover:-translate-y-1"
+            >
               {deleteConfirmation === project.id ? (
-                <div className="bg-white rounded-lg shadow-md p-6 border-2 border-red-300">
-                  <p className="text-lg font-medium mb-4">
+                <div className="bg-white rounded-2xl shadow-card p-6 border-2 border-red-300 overflow-hidden relative animate-pulse">
+                  <div className="absolute -right-8 -top-8 w-16 h-16 bg-red-100 rounded-full"></div>
+                  <div className="absolute -left-4 -bottom-4 w-12 h-12 bg-red-50 rounded-full"></div>
+
+                  <p className="text-lg font-medium mb-4 text-midnight-900">
                     Are you sure you want to delete this project?
                   </p>
-                  <div className="flex justify-end space-x-2">
+                  <div className="flex justify-end space-x-3 mt-6">
                     <Button size="sm" variant="outline" onClick={() => setDeleteConfirmation(null)}>
                       Cancel
                     </Button>
                     <Button
                       size="sm"
-                      className="bg-red-600 hover:bg-red-700"
+                      variant="danger"
                       onClick={() => handleDeleteProject(project.id)}
                     >
                       Delete
@@ -227,10 +278,41 @@ const ProjectList: React.FC = () => {
           ))}
         </div>
       ) : (
-        <p className="text-center py-8 text-gray-500">
-          No projects found matching your criteria. Try adjusting your filters or create a new
-          project.
-        </p>
+        <div className="flex flex-col items-center justify-center bg-white rounded-2xl shadow-card p-12 text-center">
+          <div className="w-24 h-24 mb-6 rounded-full bg-midnight-50 flex items-center justify-center">
+            <svg
+              className="w-12 h-12 text-midnight-300"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+              />
+            </svg>
+          </div>
+          <p className="text-xl font-medium text-midnight-700 mb-2">No projects found</p>
+          <p className="text-midnight-500 max-w-md mb-6">
+            Try adjusting your filter criteria or create a new project to get started.
+          </p>
+          {user && (
+            <Button
+              onClick={() => {
+                setEditingProject(null);
+                setIsModalOpen(true);
+                navigate('/projects/new');
+              }}
+              variant="neon"
+              icon={plusIcon}
+            >
+              Create New Project
+            </Button>
+          )}
+        </div>
       )}
 
       {/* Render create form when no project is being edited */}
@@ -274,46 +356,72 @@ interface ProjectCardProps {
 const ProjectCard: React.FC<ProjectCardProps> = ({ project, canEdit, onAction }) => {
   // Format the date for display
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h3 className="text-xl font-semibold mb-2">{project.title}</h3>
-      <p className="text-gray-600 mb-4">{project.description}</p>
+    <div className="bg-white rounded-2xl shadow-card overflow-hidden group hover:shadow-hover transition-all duration-300 relative h-full flex flex-col">
+      {/* Decorative elements */}
+      <div className="absolute -right-6 -top-6 w-12 h-12 bg-neon-100 rounded-full transition-transform group-hover:scale-150 duration-500"></div>
+      <div className="absolute -left-3 -bottom-3 w-6 h-6 bg-midnight-50 rounded-full transition-transform group-hover:scale-150 duration-500"></div>
 
-      <div className="mb-4">
-        <h4 className="text-sm font-medium text-gray-500 mb-1">Tech stack:</h4>
-        <div className="flex flex-wrap">
-          {project.skills.map(skill => (
-            <Badge key={skill} text={skill} className="mr-1 mb-1" />
-          ))}
+      <div className="p-6 flex-grow">
+        <div className="relative z-10">
+          {/* Title with dot accent */}
+          <div className="flex items-center mb-2">
+            <span className="inline-block w-2 h-2 rounded-full bg-neon-400 mr-2"></span>
+            <h3 className="text-xl font-bold text-midnight-900">{project.title}</h3>
+          </div>
+
+          {/* Description */}
+          <p className="text-midnight-600 mb-4 line-clamp-3">{project.description}</p>
+
+          {/* Skills */}
+          <div className="mb-4">
+            <h4 className="text-xs uppercase tracking-wide text-midnight-400 mb-2">Tech stack</h4>
+            <div className="flex flex-wrap gap-1.5">
+              {project.skills.map(skill => (
+                <Badge
+                  key={skill}
+                  text={skill}
+                  color="neon"
+                  variant="outline"
+                  className="text-xs"
+                />
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="mb-4">
-        <p className="text-xs text-gray-500">Created on {formatDate(project.created_at)}</p>
-      </div>
+      {/* Footer with date and actions */}
+      <div className="px-6 py-4 bg-midnight-50 border-t border-midnight-100 flex justify-between items-center">
+        <span className="text-xs text-midnight-500">Created {formatDate(project.created_at)}</span>
 
-      <div className="flex justify-end space-x-2">
-        {canEdit && (
-          <>
-            <Button size="sm" variant="outline" onClick={() => onAction('edit')}>
-              Edit
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              className="text-red-600 border-red-200 hover:bg-red-50"
-              onClick={() => onAction('delete')}
-            >
-              Delete
-            </Button>
-          </>
-        )}
-        <Button size="sm" variant="outline">
-          Contact
-        </Button>
+        <div className="flex space-x-2">
+          {canEdit && (
+            <>
+              <Button size="sm" variant="outline" onClick={() => onAction('edit')}>
+                Edit
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-red-600 border-red-200 hover:bg-red-50"
+                onClick={() => onAction('delete')}
+              >
+                Delete
+              </Button>
+            </>
+          )}
+          <Button size="sm" variant="dark">
+            Contact
+          </Button>
+        </div>
       </div>
     </div>
   );
