@@ -51,11 +51,10 @@ const ProjectList: React.FC = () => {
     }
   };
 
-  const filteredProjects = selectedSkills.length > 0
-    ? projects.filter(project => 
-        selectedSkills.some(skill => project.skills.includes(skill))
-      )
-    : projects;
+  const filteredProjects =
+    selectedSkills.length > 0
+      ? projects.filter(project => selectedSkills.some(skill => project.skills.includes(skill)))
+      : projects;
 
   const handleCreateProject = async (newProject: Omit<Project, 'id' | 'createdAt'>) => {
     try {
@@ -85,9 +84,9 @@ const ProjectList: React.FC = () => {
                 selectedSkills.includes(skill) ? 'ring-2 ring-blue-500' : ''
               }`}
             >
-              <Badge 
-                text={skill} 
-                color={selectedSkills.includes(skill) ? 'primary' : 'secondary'} 
+              <Badge
+                text={skill}
+                color={selectedSkills.includes(skill) ? 'primary' : 'secondary'}
               />
             </div>
           ))}
@@ -104,13 +103,14 @@ const ProjectList: React.FC = () => {
         </div>
       ) : (
         <p className="text-center py-8 text-gray-500">
-          No projects found matching your criteria. Try adjusting your filters or create a new project.
+          No projects found matching your criteria. Try adjusting your filters or create a new
+          project.
         </p>
       )}
 
-      <ProjectForm 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+      <ProjectForm
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
         onSubmit={handleCreateProject}
         availableSkills={skills}
       />
@@ -127,21 +127,23 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
     <div className="bg-white rounded-lg shadow-md p-6">
       <h3 className="text-xl font-semibold mb-2">{project.title}</h3>
       <p className="text-gray-600 mb-4">{project.description}</p>
-      
+
       <div className="mb-4">
-        <h4 className="text-sm font-medium text-gray-500 mb-1">Skills needed:</h4>
+        <h4 className="text-sm font-medium text-gray-500 mb-1">Tech stack:</h4>
         <div className="flex flex-wrap">
           {project.skills.map(skill => (
             <Badge key={skill} text={skill} className="mr-1 mb-1" />
           ))}
         </div>
       </div>
-      
+
       <div className="flex justify-end">
-        <Button size="sm" variant="outline">Contact</Button>
+        <Button size="sm" variant="outline">
+          Contact
+        </Button>
       </div>
     </div>
   );
 };
 
-export default ProjectList; 
+export default ProjectList;

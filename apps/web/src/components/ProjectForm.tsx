@@ -17,7 +17,9 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
-  const [errors, setErrors] = useState<{ title?: string; description?: string; skills?: string }>({});
+  const [errors, setErrors] = useState<{ title?: string; description?: string; skills?: string }>(
+    {}
+  );
 
   const resetForm = () => {
     setTitle('');
@@ -33,33 +35,33 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate form
     const newErrors: { title?: string; description?: string; skills?: string } = {};
-    
+
     if (!title.trim()) {
       newErrors.title = 'Title is required';
     }
-    
+
     if (!description.trim()) {
       newErrors.description = 'Description is required';
     }
-    
+
     if (selectedSkills.length === 0) {
       newErrors.skills = 'At least one skill is required';
     }
-    
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
-    
+
     onSubmit({
       title: title.trim(),
       description: description.trim(),
       skills: selectedSkills,
     });
-    
+
     resetForm();
   };
 
@@ -80,9 +82,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
       <Button variant="outline" onClick={handleClose}>
         Cancel
       </Button>
-      <Button onClick={handleSubmit}>
-        Create Project
-      </Button>
+      <Button onClick={handleSubmit}>Create Project</Button>
     </div>
   );
 
@@ -92,48 +92,38 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
         <Input
           label="Project Title"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={e => setTitle(e.target.value)}
           placeholder="Enter a descriptive title"
           error={errors.title}
           className="mb-4"
         />
-        
+
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Project Description
           </label>
           <textarea
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={e => setDescription(e.target.value)}
             placeholder="Describe your project and what kind of teammates you're looking for"
             className={`block w-full px-3 py-2 border ${
               errors.description ? 'border-red-300' : 'border-gray-300'
             } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm min-h-[120px]`}
           />
-          {errors.description && (
-            <p className="mt-1 text-sm text-red-600">{errors.description}</p>
-          )}
+          {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description}</p>}
         </div>
-        
+
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Skills Needed
-          </label>
-          
+          <label className="block text-sm font-medium text-gray-700 mb-1">Tech stack:</label>
+
           <div className="flex flex-wrap mb-2">
             {selectedSkills.map(skill => (
-              <SkillTag 
-                key={skill} 
-                skill={skill} 
-                onRemove={() => removeSkill(skill)} 
-              />
+              <SkillTag key={skill} skill={skill} onRemove={() => removeSkill(skill)} />
             ))}
           </div>
-          
-          {errors.skills && (
-            <p className="mt-1 text-sm text-red-600">{errors.skills}</p>
-          )}
-          
+
+          {errors.skills && <p className="mt-1 text-sm text-red-600">{errors.skills}</p>}
+
           <div className="mt-2">
             <p className="text-sm text-gray-500 mb-1">Select from available skills:</p>
             <div className="flex flex-wrap p-3 border border-gray-200 rounded-md max-h-40 overflow-y-auto">
@@ -147,8 +137,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
                   >
                     <SkillTag skill={skill} />
                   </div>
-                ))
-              }
+                ))}
             </div>
           </div>
         </div>
@@ -157,4 +146,4 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
   );
 };
 
-export default ProjectForm; 
+export default ProjectForm;
