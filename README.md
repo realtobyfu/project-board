@@ -8,6 +8,7 @@ A web platform where CS students can post projects and find teammates by skill t
 
 - Node.js v20 or higher
 - pnpm
+- Supabase account (for authentication)
 
 ### Installation
 
@@ -25,16 +26,26 @@ pnpm dev:web
 The web client will be available at http://localhost:5173
 The API server will be available at http://localhost:4000
 
-## Future Supabase Plan
+### Supabase Setup
 
-In the future, this project will integrate with Supabase for:
+1. Create a Supabase project at [supabase.com](https://supabase.com)
+2. Copy your Supabase URL and anon key from the project settings
+3. Create a `.env` file in the `apps/web` directory using the `.env.example` template:
+
+```bash
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+4. In your Supabase project, enable Email authentication in the Authentication section
+
+#### Supabase Integration
+
+This project uses Supabase for:
 
 - Authentication and user management
-- PostgreSQL database for storing projects and user profiles
-- Real-time updates for project listings
-- Storage for project files and images
-
-The current Express API will be adapted to work with Supabase client, maintaining the same API interface but replacing the in-memory storage with Supabase data access.
+- User authorization for project creation, editing, and deletion
+- Only authenticated users can create, edit, or delete projects
 
 ## Project Structure
 
@@ -49,4 +60,4 @@ project-board/
 │  └─ ui/       # Shared UI components
 │
 └─ tsconfig.base.json
-``` 
+```

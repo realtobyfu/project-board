@@ -1,18 +1,43 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal, Input, Button, SkillTag } from '@project-board/ui';
 
-interface ProjectFormProps {
+interface Project {
+  id: string;
+  title: string;
+  description: string;
+  skills: string[];
+  created_at: string;
+  updated_at: string;
+  user_id: string;
+}
+
+type ProjectUpdate = Omit<Project, 'created_at' | 'updated_at'>;
+type ProjectCreate = { title: string; description: string; skills: string[] };
+
+interface ProjectFormCreateProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (project: { title: string; description: string; skills: string[] }) => void;
+  onSubmit: (project: ProjectCreate) => void;
   availableSkills: string[];
+  initialData?: null;
 }
+
+interface ProjectFormUpdateProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (project: ProjectUpdate) => void;
+  availableSkills: string[];
+  initialData: Project;
+}
+
+type ProjectFormProps = ProjectFormCreateProps | ProjectFormUpdateProps;
 
 const ProjectForm: React.FC<ProjectFormProps> = ({
   isOpen,
   onClose,
   onSubmit,
   availableSkills,
+  initialData,
 }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -20,6 +45,17 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
   const [errors, setErrors] = useState<{ title?: string; description?: string; skills?: string }>(
     {}
   );
+
+  // Set form values when initialData changes
+  useEffect(() => {
+    if (initialData) {
+      setTitle(initialData.title);
+      setDescription(initialData.description);
+      setSelectedSkills(initialData.skills);
+    } else {
+      resetForm();
+    }
+  }, [initialData]);
 
   const resetForm = () => {
     setTitle('');
@@ -56,13 +92,22 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
       return;
     }
 
-    onSubmit({
+    const projectData = {
       title: title.trim(),
       description: description.trim(),
       skills: selectedSkills,
-    });
+    };
 
-    resetForm();
+    // If editing an existing project, include the id and user_id
+    if (initialData) {
+      onSubmit({
+        ...projectData,
+        id: initialData.id,
+        user_id: initialData.user_id,
+      } as ProjectUpdate);
+    } else {
+      onSubmit(projectData as ProjectCreate);
+    }
   };
 
   const toggleSkill = (skill: string) => {
@@ -82,12 +127,17 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
       <Button variant="outline" onClick={handleClose}>
         Cancel
       </Button>
-      <Button onClick={handleSubmit}>Create Project</Button>
+      <Button onClick={handleSubmit}>{initialData ? 'Update Project' : 'Create Project'}</Button>
     </div>
   );
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="Create a New Project" footer={modalFooter}>
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={initialData ? 'Edit Project' : 'Create a New Project'}
+      footer={modalFooter}
+    >
       <form onSubmit={handleSubmit}>
         <Input
           label="Project Title"
