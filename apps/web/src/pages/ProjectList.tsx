@@ -175,12 +175,14 @@ const ProjectList: React.FC = () => {
     <div className="pb-20">
       {/* Hero section with decorative elements */}
       <div className="relative mb-12 overflow-hidden">
-        <div className="absolute -right-10 -top-24 w-72 h-72 bg-neon-300 rounded-full filter blur-3xl opacity-20 animate-pulse-slow"></div>
-        <div className="absolute -left-20 top-10 w-72 h-72 bg-midnight-800 rounded-full filter blur-3xl opacity-10 animate-pulse-slow"></div>
+        {/* Simplified background with gradient only - removed image */}
+        <div className="absolute inset-0 bg-gradient-to-r from-midnight-50/50 to-neon-50/50 rounded-3xl"></div>
 
-        <div className="relative z-10 flex justify-between items-center py-10">
+        <div className="relative z-10 flex justify-between items-center py-10 px-6">
           <div>
-            <h1 className="text-4xl font-bold text-midnight-900 font-display">Discover Projects</h1>
+            <h1 className="text-4xl font-bold font-space-grotesk bg-gradient-text bg-clip-text text-transparent">
+              Discover Projects
+            </h1>
             <p className="mt-2 text-midnight-600 max-w-2xl">
               Find exciting collaborations or post your own project ideas to build your team.
             </p>
@@ -196,7 +198,7 @@ const ProjectList: React.FC = () => {
               variant="neon"
               size="lg"
               icon={plusIcon}
-              className="ml-4"
+              className="ml-4 rounded-xl"
             >
               Create Project
             </Button>
@@ -206,9 +208,9 @@ const ProjectList: React.FC = () => {
 
       {/* Skills filter section with modern styling */}
       <div className="mb-10 p-6 bg-white rounded-2xl shadow-card border border-gray-100">
-        <h2 className="text-lg font-medium mb-4 text-midnight-800">
+        <h2 className="text-lg font-medium mb-4 font-space-grotesk text-midnight-800 flex items-center">
           <span className="inline-block w-2 h-2 rounded-full bg-neon-400 mr-2"></span>
-          Filter by skills
+          <span className="bg-gradient-text bg-clip-text text-transparent">Filter by skills</span>
         </h2>
         <div className="flex flex-wrap gap-2">
           {skills.map(skill => (
@@ -295,7 +297,9 @@ const ProjectList: React.FC = () => {
               />
             </svg>
           </div>
-          <p className="text-xl font-medium text-midnight-700 mb-2">No projects found</p>
+          <p className="text-xl font-medium font-space-grotesk bg-gradient-text bg-clip-text text-transparent mb-2">
+            No projects found
+          </p>
           <p className="text-midnight-500 max-w-md mb-6">
             Try adjusting your filter criteria or create a new project to get started.
           </p>
@@ -374,7 +378,9 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, canEdit, onAction })
           {/* Title with dot accent */}
           <div className="flex items-center mb-2">
             <span className="inline-block w-2 h-2 rounded-full bg-neon-400 mr-2"></span>
-            <h3 className="text-xl font-bold text-midnight-900">{project.title}</h3>
+            <h3 className="text-xl font-bold font-space-grotesk bg-gradient-text bg-clip-text text-transparent">
+              {project.title}
+            </h3>
           </div>
 
           {/* Description */}
@@ -382,7 +388,9 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, canEdit, onAction })
 
           {/* Skills */}
           <div className="mb-4">
-            <h4 className="text-xs uppercase tracking-wide text-midnight-400 mb-2">Tech stack</h4>
+            <h4 className="text-xs uppercase tracking-wide text-midnight-400 mb-2 font-medium">
+              Tech stack
+            </h4>
             <div className="flex flex-wrap gap-1.5">
               {project.skills.map(skill => (
                 <Badge

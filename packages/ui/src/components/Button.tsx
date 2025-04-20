@@ -23,15 +23,15 @@ export const Button: React.FC<ButtonProps> = ({
     secondary:
       'bg-gray-100 hover:bg-gray-200 text-midnight-800 shadow-sm hover:shadow-md transition-all duration-200',
     outline:
-      'bg-transparent border-2 border-midnight-200 hover:border-midnight-300 text-midnight-800 hover:bg-midnight-50 transition-all duration-200',
+      'bg-white border-2 border-midnight-300 hover:border-midnight-400 text-midnight-800 hover:bg-midnight-50 transition-all duration-200',
     neon: 'bg-neon-400 hover:bg-neon-500 text-midnight-900 shadow-neon hover:shadow-lg transition-all duration-200 font-medium',
-    dark: 'bg-midnight-900 hover:bg-black text-white shadow-md hover:shadow-lg transition-all duration-200 border border-midnight-700',
+    dark: 'bg-midnight-800 hover:bg-midnight-900 text-white shadow-md hover:shadow-lg transition-all duration-200 border border-midnight-700',
     danger:
       'bg-red-600 hover:bg-red-700 text-white shadow-md hover:shadow-lg transition-all duration-200',
   };
 
   const sizeClasses = {
-    sm: 'px-3 py-1 text-sm rounded-lg',
+    sm: 'px-3 py-1 text-sm rounded-xl',
     md: 'px-4 py-2 rounded-xl',
     lg: 'px-6 py-3 text-lg rounded-xl',
   };

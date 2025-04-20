@@ -57,6 +57,12 @@ export default {
       },
       fontFamily: {
         display: ['Inter', 'system-ui', 'sans-serif'],
+        'space-grotesk': ['Space Grotesk', 'sans-serif'],
+      },
+      backgroundImage: {
+        'gradient-neon': 'linear-gradient(90deg, #6aeb94 0%, #36de6c 50%, #107a33 100%)',
+        'gradient-midnight': 'linear-gradient(90deg, #476999 0%, #2c4264 50%, #192136 100%)',
+        'gradient-text': 'linear-gradient(90deg, #36de6c 0%, #273953 100%)',
       },
     },
   },

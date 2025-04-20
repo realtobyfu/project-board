@@ -46,6 +46,40 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
     {}
   );
 
+  // Default skills to use if none are available from API
+  const defaultSkills = [
+    'JavaScript',
+    'TypeScript',
+    'React',
+    'Node.js',
+    'Python',
+    'Java',
+    'C++',
+    'SQL',
+    'NoSQL',
+    'GraphQL',
+    'REST API',
+    'Docker',
+    'AWS',
+    'Machine Learning',
+    'UI/UX',
+    'React Native',
+    'Tailwind CSS',
+    'Express',
+    'MongoDB',
+    'Firebase',
+    'Supabase',
+    'Next.js',
+    'Vue.js',
+    'Angular',
+    'Django',
+    'Flutter',
+  ];
+
+  // Use availableSkills if they exist, otherwise use defaults
+  const displaySkills =
+    availableSkills && availableSkills.length > 0 ? availableSkills : defaultSkills;
+
   // Set form values when initialData changes
   useEffect(() => {
     if (initialData) {
@@ -228,7 +262,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
               </div>
 
               <div className="flex flex-wrap gap-2 p-3 border border-gray-200 rounded-xl max-h-40 overflow-y-auto bg-white">
-                {availableSkills
+                {displaySkills
                   .filter(skill => !selectedSkills.includes(skill))
                   .map(skill => (
                     <div
@@ -239,7 +273,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
                       <SkillTag skill={skill} color="primary" variant="outline" />
                     </div>
                   ))}
-                {availableSkills.filter(skill => !selectedSkills.includes(skill)).length === 0 && (
+                {displaySkills.filter(skill => !selectedSkills.includes(skill)).length === 0 && (
                   <span className="text-sm text-midnight-500 italic">All skills selected</span>
                 )}
               </div>

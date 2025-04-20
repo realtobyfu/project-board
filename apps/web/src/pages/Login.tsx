@@ -61,65 +61,83 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
-      <h1 className="text-2xl font-bold mb-6 text-center">
-        {isResetMode ? 'Reset Your Password' : 'Log in to Project Board'}
+    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-2xl shadow-card">
+      {/* Decorative elements */}
+      <div className="absolute -right-10 -top-10 w-40 h-40 bg-neon-300 rounded-full filter blur-3xl opacity-10 animate-pulse-slow"></div>
+      <div className="absolute -left-20 bottom-10 w-40 h-40 bg-midnight-800 rounded-full filter blur-3xl opacity-10 animate-pulse-slow"></div>
+
+      <h1 className="text-2xl font-bold mb-6 text-center font-space-grotesk">
+        {isResetMode ? (
+          <span className="bg-gradient-text bg-clip-text text-transparent">
+            Reset Your Password
+          </span>
+        ) : (
+          <span className="bg-gradient-text bg-clip-text text-transparent">
+            Log in to Project Board
+          </span>
+        )}
       </h1>
 
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mb-4">
           {error}
         </div>
       )}
 
       {successMessage && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-xl mb-4">
           {successMessage}
         </div>
       )}
 
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label htmlFor="email" className="block text-gray-700 font-medium mb-2">
-            Email
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-midnight-700 mb-2">
+            Email<span className="text-neon-500 ml-1">*</span>
           </label>
           <input
             id="email"
             type="email"
             value={email}
             onChange={e => setEmail(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-neon-400 focus:border-transparent"
             required
           />
         </div>
 
         {!isResetMode && (
-          <div className="mb-6">
-            <label htmlFor="password" className="block text-gray-700 font-medium mb-2">
-              Password
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-midnight-700 mb-2">
+              Password<span className="text-neon-500 ml-1">*</span>
             </label>
             <input
               id="password"
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-neon-400 focus:border-transparent"
               required
             />
           </div>
         )}
 
-        <Button type="submit" className="w-full" disabled={isLoading}>
+        <Button type="submit" variant="neon" className="w-full" disabled={isLoading}>
           {isLoading ? 'Processing...' : isResetMode ? 'Send Reset Link' : 'Log in'}
         </Button>
       </form>
 
       {!isResetMode && (
         <>
-          <div className="mt-4">
+          <div className="relative flex items-center my-6">
+            <div className="flex-grow border-t border-gray-200"></div>
+            <span className="flex-shrink mx-4 text-gray-400 text-sm">or</span>
+            <div className="flex-grow border-t border-gray-200"></div>
+          </div>
+
+          <div>
             <Button
               onClick={handleGitHubLogin}
-              variant="outline"
+              variant="dark"
               className="w-full flex items-center justify-center"
             >
               <svg viewBox="0 0 24 24" className="h-5 w-5 mr-2" fill="currentColor">
@@ -129,10 +147,10 @@ const Login: React.FC = () => {
             </Button>
           </div>
 
-          <div className="mt-4 text-center">
+          <div className="mt-6 text-center">
             <button
               onClick={() => setIsResetMode(true)}
-              className="text-blue-600 hover:underline text-sm"
+              className="text-neon-600 hover:underline text-sm font-medium"
               type="button"
             >
               Forgot your password?
@@ -141,19 +159,19 @@ const Login: React.FC = () => {
         </>
       )}
 
-      <div className="mt-4 text-center">
+      <div className="mt-6 text-center">
         {isResetMode ? (
           <button
             onClick={() => setIsResetMode(false)}
-            className="text-blue-600 hover:underline"
+            className="text-neon-600 hover:underline font-medium"
             type="button"
           >
             Back to login
           </button>
         ) : (
-          <p className="text-gray-600">
+          <p className="text-midnight-600">
             Don't have an account?{' '}
-            <Link to="/signup" className="text-blue-600 hover:underline">
+            <Link to="/signup" className="text-neon-600 hover:underline font-medium">
               Sign up
             </Link>
           </p>
