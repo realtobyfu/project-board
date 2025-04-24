@@ -10,7 +10,7 @@ const UpdatePassword: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { updatePassword, user } = useAuth();
+  const { updatePassword } = useAuth();
   const navigate = useNavigate();
 
   // Check if we have access token in URL (from password reset email)

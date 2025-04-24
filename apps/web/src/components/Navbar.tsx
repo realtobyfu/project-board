@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Button } from '@project-board/ui';
 import { useAuth } from '../contexts/AuthContext';
 
 const Navbar: React.FC = () => {
