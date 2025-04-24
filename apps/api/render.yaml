@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: project-board-api
+    env: node
+    buildCommand: cd ../.. && pnpm install && pnpm --filter api build
+    startCommand: cd dist && node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: API_PORT
+        value: 10000
