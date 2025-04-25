@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { projectRoutes } from './routes/project';
 import { skillRoutes } from './routes/skill';
+import { healthRoutes } from './routes/health';
 
 // Load environment variables
 dotenv.config();
@@ -15,6 +16,14 @@ const allowedOrigins = [
   'http://localhost:5173',
   process.env.FRONTEND_URL, // Your Vercel frontend URL will be set as env var
 ];
+
+// Log environment variables (without sensitive values)
+console.log('Starting server with config:');
+console.log(`- NODE_ENV: ${process.env.NODE_ENV}`);
+console.log(`- PORT: ${port}`);
+console.log(`- FRONTEND_URL configured: ${!!process.env.FRONTEND_URL}`);
+console.log(`- SUPABASE_URL configured: ${!!process.env.SUPABASE_URL}`);
+console.log(`- SUPABASE_SERVICE_KEY configured: ${!!process.env.SUPABASE_SERVICE_KEY}`);
 
 // Middleware
 app.use(express.json());
@@ -40,9 +49,12 @@ app.use(
 app.use('/api/projects', projectRoutes);
 app.use('/api/skills', skillRoutes);
 
-// Health check
-app.get('/health', (req, res) => {
-  res.status(200).send('OK');
+// Health check routes
+app.use('/health', healthRoutes);
+
+// Simple health check route for basic connectivity testing
+app.get('/', (req, res) => {
+  res.status(200).send('API is running');
 });
 
 // Start server

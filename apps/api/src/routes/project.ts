@@ -16,6 +16,8 @@ const router = Router();
 // GET /api/projects - Get all projects
 router.get('/', async (req: Request, res: Response) => {
   try {
+    console.log('GET /api/projects - Fetching all projects');
+
     const { data, error } = await supabase
       .from('projects')
       .select('*')
@@ -23,13 +25,29 @@ router.get('/', async (req: Request, res: Response) => {
 
     if (error) {
       console.error('Error fetching projects:', error);
-      return res.status(500).json({ error: 'Failed to fetch projects' });
+      return res.status(500).json({
+        error: 'Failed to fetch projects',
+        details: error.message,
+        code: error.code,
+      });
     }
 
-    res.status(200).json(data);
+    console.log(`Successfully fetched ${data?.length || 0} projects`);
+    res.status(200).json(data || []);
   } catch (error) {
     console.error('Error in GET /api/projects:', error);
-    res.status(500).json({ error: 'Server error' });
+    let errorMessage = 'Server error';
+    let errorDetails = '';
+
+    if (error instanceof Error) {
+      errorMessage = error.message;
+      errorDetails = error.stack || '';
+    }
+
+    res.status(500).json({
+      error: errorMessage,
+      details: errorDetails,
+    });
   }
 });
 
