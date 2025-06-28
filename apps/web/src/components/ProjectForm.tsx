@@ -9,10 +9,12 @@ interface Project {
   created_at: string;
   updated_at: string;
   user_id: string;
+  contact_method?: 'email' | 'phone' | 'discord';
+  contact_info?: string;
 }
 
 type ProjectUpdate = Omit<Project, 'created_at' | 'updated_at'>;
-type ProjectCreate = { title: string; description: string; skills: string[] };
+type ProjectCreate = { title: string; description: string; skills: string[]; contact_method?: 'email' | 'phone' | 'discord'; contact_info?: string; };
 
 interface ProjectFormCreateProps {
   isOpen: boolean;
@@ -42,7 +44,9 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
-  const [errors, setErrors] = useState<{ title?: string; description?: string; skills?: string }>(
+  const [contactMethod, setContactMethod] = useState<'email' | 'phone' | 'discord' | ''>('');
+  const [contactInfo, setContactInfo] = useState('');
+  const [errors, setErrors] = useState<{ title?: string; description?: string; skills?: string; contact?: string }>(
     {}
   );
 
@@ -86,6 +90,8 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
       setTitle(initialData.title);
       setDescription(initialData.description);
       setSelectedSkills(initialData.skills);
+      setContactMethod((initialData.contact_method || '') as any);
+      setContactInfo(initialData.contact_info || '');
     } else {
       resetForm();
     }
@@ -95,6 +101,8 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
     setTitle('');
     setDescription('');
     setSelectedSkills([]);
+    setContactMethod('');
+    setContactInfo('');
     setErrors({});
   };
 
@@ -107,7 +115,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
     e.preventDefault();
 
     // Validate form
-    const newErrors: { title?: string; description?: string; skills?: string } = {};
+    const newErrors: { title?: string; description?: string; skills?: string; contact?: string } = {};
 
     if (!title.trim()) {
       newErrors.title = 'Title is required';
@@ -121,6 +129,15 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
       newErrors.skills = 'At least one skill is required';
     }
 
+    // Validate contact info if contact method is selected
+    if (contactMethod && !contactInfo.trim()) {
+      newErrors.contact = 'Contact information is required when a contact method is selected';
+    }
+
+    if (!contactMethod && contactInfo.trim()) {
+      newErrors.contact = 'Please select a contact method';
+    }
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -130,6 +147,10 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
       title: title.trim(),
       description: description.trim(),
       skills: selectedSkills,
+      ...(contactMethod && contactInfo.trim() && {
+        contact_method: contactMethod,
+        contact_info: contactInfo.trim(),
+      }),
     };
 
     // If editing an existing project, include the id and user_id
@@ -262,6 +283,105 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
                 )}
               </div>
             </div>
+          </div>
+
+          {/* Contact Information */}
+          <div className="space-y-4">
+            <label className="block text-sm font-medium text-midnight-700 mb-1">
+              Contact Information
+            </label>
+            
+            {/* Contact Method */}
+            <div>
+              <label className="block text-sm text-midnight-600 mb-2">
+                How can teammates reach you?
+              </label>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setContactMethod('email')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all ${
+                    contactMethod === 'email'
+                      ? 'border-neon-500 bg-neon-50 text-neon-700'
+                      : 'border-gray-300 hover:border-gray-400'
+                  }`}
+                >
+                  <svg 
+                    className="w-4 h-4" 
+                    fill="currentColor" 
+                    viewBox="0 0 20 20" 
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                  </svg>
+                  Email
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setContactMethod('phone')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all ${
+                    contactMethod === 'phone'
+                      ? 'border-neon-500 bg-neon-50 text-neon-700'
+                      : 'border-gray-300 hover:border-gray-400'
+                  }`}
+                >
+                  <svg 
+                    className="w-4 h-4" 
+                    fill="currentColor" 
+                    viewBox="0 0 20 20" 
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                  </svg>
+                  Phone
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setContactMethod('discord')}
+                  className={`p-2 rounded-lg border-2 transition-all ${
+                    contactMethod === 'discord'
+                      ? 'border-neon-500 bg-neon-50 text-neon-700'
+                      : 'border-gray-300 hover:border-gray-400'
+                  }`}
+                  title="Discord"
+                >
+                  <svg 
+                    className="w-5 h-5" 
+                    viewBox="0 0 24 24" 
+                    fill="currentColor" 
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189z"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Contact Info Input */}
+            {contactMethod && (
+              <div>
+                <input
+                  type="text"
+                  value={contactInfo}
+                  onChange={e => setContactInfo(e.target.value)}
+                  placeholder={
+                    contactMethod === 'email'
+                      ? 'your.email@example.com'
+                      : contactMethod === 'phone'
+                      ? '+1 (555) 123-4567'
+                      : 'YourUsername#1234'
+                  }
+                  className={`block w-full px-3 py-2 border ${
+                    errors.contact
+                      ? 'border-red-300 focus:ring-red-500'
+                      : 'border-gray-300 focus:ring-neon-500'
+                  } rounded-xl shadow-sm focus:outline-none focus:border-transparent focus:ring-2 transition-all duration-200`}
+                />
+              </div>
+            )}
+
+            {errors.contact && <p className="mt-1 text-sm text-red-600">{errors.contact}</p>}
           </div>
         </div>
       </form>

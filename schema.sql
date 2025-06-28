@@ -6,7 +6,9 @@ CREATE TABLE IF NOT EXISTS public.projects (
   skills TEXT[] NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  contact_method TEXT CHECK (contact_method IN ('email', 'phone', 'discord')),
+  contact_info TEXT
 );
 
 -- Create skills table to track available skills

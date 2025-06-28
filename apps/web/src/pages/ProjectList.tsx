@@ -13,9 +13,11 @@ interface Project {
   created_at: string;
   updated_at: string;
   user_id: string;
+  contact_method?: 'email' | 'phone' | 'discord';
+  contact_info?: string;
 }
 
-type ProjectCreate = { title: string; description: string; skills: string[] };
+type ProjectCreate = { title: string; description: string; skills: string[]; contact_method?: 'email' | 'phone' | 'discord'; contact_info?: string; };
 type ProjectUpdate = Omit<Project, 'created_at' | 'updated_at'>;
 
 const ProjectList: React.FC = () => {
@@ -273,7 +275,20 @@ const ProjectList: React.FC = () => {
                 <ProjectCard
                   project={project}
                   canEdit={canEditProject(project)}
-                  onAction={action => handleProjectAction(project, action)}
+                  onAction={action => {
+                    if (action === 'contact') {
+                      // Show contact info
+                      if (project.contact_method && project.contact_info) {
+                        const contactLabel = project.contact_method === 'email' ? 'Email' : 
+                                           project.contact_method === 'phone' ? 'Phone' : 'Discord';
+                        alert(`${contactLabel}: ${project.contact_info}`);
+                      } else {
+                        alert('No contact information provided for this project.');
+                      }
+                    } else {
+                      handleProjectAction(project, action as 'edit' | 'delete');
+                    }
+                  }}
                 />
               )}
             </div>
@@ -354,7 +369,7 @@ const ProjectList: React.FC = () => {
 interface ProjectCardProps {
   project: Project;
   canEdit: boolean;
-  onAction: (action: 'edit' | 'delete') => void;
+  onAction: (action: 'edit' | 'delete' | 'contact') => void;
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({ project, canEdit, onAction }) => {
@@ -426,7 +441,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, canEdit, onAction })
               </Button>
             </>
           )}
-          <Button size="sm" variant="dark">
+          <Button 
+            size="sm" 
+            variant="dark"
+            onClick={() => onAction('contact')}
+          >
             Contact
           </Button>
         </div>

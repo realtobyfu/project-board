@@ -9,6 +9,8 @@ interface Project {
   created_at: string;
   updated_at: string;
   user_id: string;
+  contact_method?: 'email' | 'phone' | 'discord';
+  contact_info?: string;
 }
 
 const router = Router();
@@ -75,12 +77,26 @@ router.get('/:id', async (req: Request, res: Response) => {
 // POST /api/projects - Create a new project
 router.post('/', async (req: Request, res: Response) => {
   try {
-    const { title, description, skills, userId } = req.body;
+    const { title, description, skills, userId, contact_method, contact_info } = req.body;
 
     // Validate input
     if (!title || !description || !Array.isArray(skills) || !userId) {
       return res.status(400).json({
         error: 'Title, description, skills array, and userId are required',
+      });
+    }
+
+    // Validate contact method if provided
+    if (contact_method && !['email', 'phone', 'discord'].includes(contact_method)) {
+      return res.status(400).json({
+        error: 'Invalid contact method. Must be email, phone, or discord',
+      });
+    }
+
+    // Validate contact info if contact method is provided
+    if (contact_method && !contact_info) {
+      return res.status(400).json({
+        error: 'Contact info is required when contact method is provided',
       });
     }
 
@@ -93,6 +109,10 @@ router.post('/', async (req: Request, res: Response) => {
           description,
           skills,
           user_id: userId,
+          ...(contact_method && contact_info && {
+            contact_method,
+            contact_info,
+          }),
         },
       ])
       .select()
@@ -114,12 +134,26 @@ router.post('/', async (req: Request, res: Response) => {
 router.put('/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { title, description, skills, userId } = req.body;
+    const { title, description, skills, userId, contact_method, contact_info } = req.body;
 
     // Validate input
     if (!title || !description || !Array.isArray(skills) || !userId) {
       return res.status(400).json({
         error: 'Title, description, skills array, and userId are required',
+      });
+    }
+
+    // Validate contact method if provided
+    if (contact_method && !['email', 'phone', 'discord'].includes(contact_method)) {
+      return res.status(400).json({
+        error: 'Invalid contact method. Must be email, phone, or discord',
+      });
+    }
+
+    // Validate contact info if contact method is provided
+    if (contact_method && !contact_info) {
+      return res.status(400).json({
+        error: 'Contact info is required when contact method is provided',
       });
     }
 
@@ -149,6 +183,10 @@ router.put('/:id', async (req: Request, res: Response) => {
         title,
         description,
         skills,
+        ...(contact_method && contact_info && {
+          contact_method,
+          contact_info,
+        }),
       })
       .eq('id', id)
       .select()
