@@ -28,21 +28,21 @@ export const supabase = createClient(supabaseUrl, supabaseServiceKey, {
   },
 });
 
-// Test the connection
-(async () => {
-  try {
-    const { data, error } = await supabase
-      .from('projects')
-      .select('count', { count: 'exact' })
-      .limit(1);
-    if (error) {
-      console.error('Supabase connection test failed:', error);
-    } else {
-      console.log('Supabase connection established successfully');
-    }
-  } catch (err) {
-    console.error('Supabase connection test error:', err);
-  }
-})();
+// Test the connection (disabled for local development)
+// (async () => {
+//   try {
+//     const { data, error } = await supabase
+//       .from('projects')
+//       .select('count', { count: 'exact' })
+//       .limit(1);
+//     if (error) {
+//       console.error('Supabase connection test failed:', error);
+//     } else {
+//       console.log('Supabase connection established successfully');
+//     }
+//   } catch (err) {
+//     console.error('Supabase connection test error:', err);
+//   }
+// })();
 
 export default supabase;
