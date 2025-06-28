@@ -3,7 +3,7 @@ services:
     name: project-board-api
     env: node
     buildCommand: cd ../.. && pnpm install && pnpm --filter api build
-    startCommand: cd dist && node server.js
+    startCommand: cd apps/api && node dist/server.js
     envVars:
       - key: NODE_ENV
         value: production
