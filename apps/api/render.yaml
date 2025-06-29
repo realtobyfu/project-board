@@ -9,3 +9,5 @@ services:
         value: production
       - key: API_PORT
         value: 10000
+      - key: FRONTEND_URL
+        value: https://project-board-web.vercel.app

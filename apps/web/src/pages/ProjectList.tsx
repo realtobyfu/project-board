@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { Badge, Button } from '@project-board/ui';
 import ProjectForm from '../components/ProjectForm';
 import { useAuth } from '../contexts/AuthContext';
+import api from '../lib/api';
 
 interface Project {
   id: string;
@@ -52,7 +52,7 @@ const ProjectList: React.FC = () => {
     if (id) {
       const fetchProjectToEdit = async () => {
         try {
-          const response = await axios.get(`http://localhost:4000/api/projects/${id}`);
+          const response = await api.get(`/api/projects/${id}`);
           setEditingProject(response.data);
           setIsModalOpen(true);
         } catch (error) {
@@ -66,7 +66,7 @@ const ProjectList: React.FC = () => {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await axios.get('http://localhost:4000/api/projects');
+        const response = await api.get('/api/projects');
         setProjects(response.data);
         setIsLoading(false);
       } catch (error) {
@@ -77,7 +77,7 @@ const ProjectList: React.FC = () => {
 
     const fetchSkills = async () => {
       try {
-        const response = await axios.get('http://localhost:4000/api/skills');
+        const response = await api.get('/api/skills');
         setSkills(response.data);
       } catch (error) {
         console.error('Error fetching skills:', error);
@@ -109,7 +109,7 @@ const ProjectList: React.FC = () => {
         userId: user?.id,
       };
 
-      const response = await axios.post('http://localhost:4000/api/projects', projectWithUser);
+      const response = await api.post('/api/projects', projectWithUser);
       setProjects([...projects, response.data]);
       setIsModalOpen(false);
       navigate('/projects');
@@ -126,8 +126,8 @@ const ProjectList: React.FC = () => {
         userId: updatedProject.user_id, // Map user_id to userId for API
       };
 
-      const response = await axios.put(
-        `http://localhost:4000/api/projects/${updatedProject.id}`,
+      const response = await api.put(
+        `/api/projects/${updatedProject.id}`,
         transformedProject
       );
 
@@ -142,7 +142,7 @@ const ProjectList: React.FC = () => {
 
   const handleDeleteProject = async (projectId: string) => {
     try {
-      await axios.delete(`http://localhost:4000/api/projects/${projectId}`, {
+      await api.delete(`/api/projects/${projectId}`, {
         data: { userId: user?.id },
       });
       setProjects(projects.filter(p => p.id !== projectId));
