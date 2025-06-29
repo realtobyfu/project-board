@@ -11,6 +11,7 @@ interface Project {
   user_id: string;
   contact_method?: 'email' | 'phone' | 'discord';
   contact_info?: string;
+  ideal_teammate?: string[];
 }
 
 const router = Router();
@@ -77,7 +78,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 // POST /api/projects - Create a new project
 router.post('/', async (req: Request, res: Response) => {
   try {
-    const { title, description, skills, userId, contact_method, contact_info } = req.body;
+    const { title, description, skills, userId, contact_method, contact_info, ideal_teammate } = req.body;
 
     // Validate input
     if (!title || !description || !Array.isArray(skills) || !userId) {
@@ -113,6 +114,9 @@ router.post('/', async (req: Request, res: Response) => {
             contact_method,
             contact_info,
           }),
+          ...(ideal_teammate && Array.isArray(ideal_teammate) && {
+            ideal_teammate,
+          }),
         },
       ])
       .select()
@@ -134,7 +138,7 @@ router.post('/', async (req: Request, res: Response) => {
 router.put('/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { title, description, skills, userId, contact_method, contact_info } = req.body;
+    const { title, description, skills, userId, contact_method, contact_info, ideal_teammate } = req.body;
 
     // Validate input
     if (!title || !description || !Array.isArray(skills) || !userId) {
@@ -186,6 +190,9 @@ router.put('/:id', async (req: Request, res: Response) => {
         ...(contact_method && contact_info && {
           contact_method,
           contact_info,
+        }),
+        ...(ideal_teammate && Array.isArray(ideal_teammate) && {
+          ideal_teammate,
         }),
       })
       .eq('id', id)
