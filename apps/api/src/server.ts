@@ -21,27 +21,33 @@ const allowedOrigins = [
 console.log('Starting server with config:');
 console.log(`- NODE_ENV: ${process.env.NODE_ENV}`);
 console.log(`- PORT: ${port}`);
-console.log(`- FRONTEND_URL configured: ${!!process.env.FRONTEND_URL}`);
+console.log(`- FRONTEND_URL: ${process.env.FRONTEND_URL}`);
 console.log(`- SUPABASE_URL configured: ${!!process.env.SUPABASE_URL}`);
 console.log(`- SUPABASE_SERVICE_KEY configured: ${!!process.env.SUPABASE_SERVICE_KEY}`);
+console.log('- Allowed origins:', allowedOrigins);
 
 // Middleware
 app.use(express.json());
 app.use(
   cors({
     origin: function (origin, callback) {
+      console.log('CORS check - Origin:', origin);
+      console.log('CORS check - Allowed origins:', allowedOrigins);
+      
       // Allow requests with no origin (like mobile apps, curl, etc)
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.indexOf(origin) === -1) {
         const msg =
           'The CORS policy for this site does not allow access from the specified origin.';
+        console.error('CORS blocked:', origin);
         return callback(new Error(msg), false);
       }
       return callback(null, true);
     },
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
   })
 );
 
