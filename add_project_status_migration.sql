@@ -3,6 +3,15 @@ ALTER TABLE projects
 ADD COLUMN status TEXT DEFAULT 'active' CHECK (status IN ('active', 'archived')),
 ADD COLUMN archived_at TIMESTAMP WITH TIME ZONE;
 
+-- Update all existing projects to have 'active' status
+UPDATE projects 
+SET status = 'active' 
+WHERE status IS NULL;
+
+-- Make status NOT NULL after setting values
+ALTER TABLE projects 
+ALTER COLUMN status SET NOT NULL;
+
 -- Create an index on status for better query performance
 CREATE INDEX idx_projects_status ON projects(status);
 

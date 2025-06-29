@@ -27,18 +27,11 @@ router.get('/', async (req: Request, res: Response) => {
     console.log('GET /api/projects - Fetching all projects');
     const userId = req.query.userId as string | undefined;
 
-    // Build query based on whether user is logged in
-    let query = supabase.from('projects').select('*');
-    
-    if (userId) {
-      // If user is logged in, show active projects and their own archived projects
-      query = query.or(`status.eq.active,and(status.eq.archived,user_id.eq.${userId})`);
-    } else {
-      // If not logged in, only show active projects
-      query = query.eq('status', 'active');
-    }
-    
-    const { data, error } = await query.order('created_at', { ascending: false });
+    // Fetch all projects - RLS will handle filtering
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('Error fetching projects:', error);
