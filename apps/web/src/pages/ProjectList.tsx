@@ -15,7 +15,12 @@ interface Project {
   user_id: string;
   contact_method?: 'email' | 'phone' | 'discord';
   contact_info?: string;
+  contact_name?: string;
   ideal_teammate?: string[];
+  collaboration_preference?: 'remote' | 'in-person' | 'flexible';
+  location?: string;
+  status?: 'active' | 'archived';
+  archived_at?: string;
 }
 
 type ProjectCreate = {
@@ -24,7 +29,10 @@ type ProjectCreate = {
   skills: string[];
   contact_method?: 'email' | 'phone' | 'discord';
   contact_info?: string;
+  contact_name?: string;
   ideal_teammate?: string[];
+  collaboration_preference?: 'remote' | 'in-person' | 'flexible';
+  location?: string;
 };
 type ProjectUpdate = Omit<Project, 'created_at' | 'updated_at'>;
 
@@ -36,6 +44,7 @@ const ProjectList: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [skills, setSkills] = useState<string[]>([]);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const [activeSkills, setActiveSkills] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
@@ -66,8 +75,19 @@ const ProjectList: React.FC = () => {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await api.get('/api/projects');
+        // Pass userId as query param if user is logged in
+        const response = await api.get('/api/projects', {
+          params: user ? { userId: user.id } : {}
+        });
         setProjects(response.data);
+        
+        // Extract unique skills from active projects
+        const skillsInUse = new Set<string>();
+        response.data.forEach((project: Project) => {
+          project.skills.forEach(skill => skillsInUse.add(skill));
+        });
+        setActiveSkills(Array.from(skillsInUse).sort());
+        
         setIsLoading(false);
       } catch (error) {
         console.error('Error fetching projects:', error);
@@ -86,7 +106,7 @@ const ProjectList: React.FC = () => {
 
     fetchProjects();
     fetchSkills();
-  }, []);
+  }, [user]);
 
   const toggleSkillFilter = (skill: string) => {
     if (selectedSkills.includes(skill)) {
@@ -152,13 +172,31 @@ const ProjectList: React.FC = () => {
     }
   };
 
-  const handleProjectAction = (project: Project, action: 'edit' | 'delete') => {
+  const handleArchiveProject = async (projectId: string, archive: boolean) => {
+    try {
+      const response = await api.patch(`/api/projects/${projectId}/archive`, {
+        userId: user?.id,
+        archive
+      });
+      
+      // Update the project in the local state
+      setProjects(projects.map(p => 
+        p.id === projectId ? response.data : p
+      ));
+    } catch (error) {
+      console.error('Error archiving project:', error);
+    }
+  };
+
+  const handleProjectAction = (project: Project, action: 'edit' | 'delete' | 'archive') => {
     if (action === 'edit') {
       setEditingProject(project);
       setIsModalOpen(true);
       navigate(`/projects/edit/${project.id}`);
     } else if (action === 'delete') {
       setDeleteConfirmation(project.id);
+    } else if (action === 'archive') {
+      handleArchiveProject(project.id, project.status !== 'archived');
     }
   };
 
@@ -224,25 +262,29 @@ const ProjectList: React.FC = () => {
           <span className="bg-gradient-text bg-clip-text text-transparent">Filter by skills</span>
         </h2>
         <div className="flex flex-wrap gap-2">
-          {skills.map(skill => (
-            <div
-              key={skill}
-              onClick={() => toggleSkillFilter(skill)}
-              className="relative cursor-pointer transition-transform hover:scale-105"
-            >
-              <Badge
-                text={skill}
-                color={selectedSkills.includes(skill) ? 'neon' : 'primary'}
-                variant={selectedSkills.includes(skill) ? 'solid' : 'outline'}
-              />
-              {selectedSkills.includes(skill) && (
-                <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-neon-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-neon-500"></span>
-                </span>
-              )}
-            </div>
-          ))}
+          {activeSkills.length > 0 ? (
+            activeSkills.map(skill => (
+              <div
+                key={skill}
+                onClick={() => toggleSkillFilter(skill)}
+                className="relative cursor-pointer transition-transform hover:scale-105"
+              >
+                <Badge
+                  text={skill}
+                  color={selectedSkills.includes(skill) ? 'neon' : 'primary'}
+                  variant={selectedSkills.includes(skill) ? 'solid' : 'outline'}
+                />
+                {selectedSkills.includes(skill) && (
+                  <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-neon-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-neon-500"></span>
+                  </span>
+                )}
+              </div>
+            ))
+          ) : (
+            <p className="text-sm text-midnight-500 italic">No active skills to filter</p>
+          )}
         </div>
       </div>
 
@@ -290,7 +332,7 @@ const ProjectList: React.FC = () => {
                         showContactForProject === project.id ? null : project.id
                       );
                     } else {
-                      handleProjectAction(project, action as 'edit' | 'delete');
+                      handleProjectAction(project, action as 'edit' | 'delete' | 'archive');
                     }
                   }}
                   showContact={showContactForProject === project.id}
@@ -374,7 +416,7 @@ const ProjectList: React.FC = () => {
 interface ProjectCardProps {
   project: Project;
   canEdit: boolean;
-  onAction: (action: 'edit' | 'delete' | 'contact') => void;
+  onAction: (action: 'edit' | 'delete' | 'contact' | 'archive') => void;
   showContact: boolean;
 }
 
@@ -410,9 +452,16 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, canEdit, onAction, s
   const colorScheme = getColorScheme(project.id);
 
   return (
-    <div className="bg-white rounded-2xl shadow-card overflow-hidden group hover:shadow-hover transition-all duration-300 relative h-full flex flex-col">
+    <div className={`bg-white rounded-2xl shadow-card overflow-hidden group hover:shadow-hover transition-all duration-300 relative h-full flex flex-col ${project.status === 'archived' ? 'opacity-75' : ''}`}>
       {/* Gradient header */}
       <div className={`h-2 bg-gradient-to-r ${colorScheme.bg}`}></div>
+      
+      {/* Archived indicator */}
+      {project.status === 'archived' && (
+        <div className="absolute top-4 right-4 bg-gray-600 text-white text-xs px-2 py-1 rounded-full z-20">
+          Archived
+        </div>
+      )}
 
       {/* Decorative elements */}
       <div
@@ -485,6 +534,54 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, canEdit, onAction, s
               ))}
             </div>
           </div>
+
+          {/* Collaboration & Location */}
+          {(project.collaboration_preference || project.location) && (
+            <div className="mb-4 flex items-center gap-4 text-xs text-midnight-500">
+              {project.collaboration_preference && (
+                <div className="flex items-center gap-1">
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                    />
+                  </svg>
+                  <span className="capitalize">{project.collaboration_preference}</span>
+                </div>
+              )}
+              {project.location && (
+                <div className="flex items-center gap-1">
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
+                  <span>{project.location}</span>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -505,6 +602,14 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, canEdit, onAction, s
                 onClick={() => onAction('delete')}
               >
                 Delete
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className={project.status === 'archived' ? 'text-green-600 border-green-200 hover:bg-green-50' : 'text-gray-600 border-gray-200 hover:bg-gray-50'}
+                onClick={() => onAction('archive')}
+              >
+                {project.status === 'archived' ? 'Unarchive' : 'Archive'}
               </Button>
             </>
           )}
@@ -569,6 +674,9 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, canEdit, onAction, s
                         ? 'Phone'
                         : 'Discord'}
                   </p>
+                  {project.contact_name && (
+                    <p className="font-medium text-sm text-midnight-900">{project.contact_name}</p>
+                  )}
                   <p className="font-mono text-sm text-midnight-800">{project.contact_info}</p>
                 </div>
               </div>

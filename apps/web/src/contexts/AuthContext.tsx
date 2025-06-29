@@ -11,6 +11,7 @@ interface AuthContextProps {
   signOut: () => Promise<{ error: any }>;
   resetPassword: (email: string) => Promise<{ error: any }>;
   updatePassword: (password: string) => Promise<{ error: any }>;
+  deleteAccount: () => Promise<{ error: any }>;
   loading: boolean;
 }
 
@@ -82,6 +83,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { error };
   };
 
+  const deleteAccount = async () => {
+    try {
+      // Delete user's data first (projects, etc.)
+      if (user) {
+        // Delete all user's projects
+        const { error: deleteProjectsError } = await supabase
+          .from('projects')
+          .delete()
+          .eq('user_id', user.id);
+        
+        if (deleteProjectsError) {
+          return { error: deleteProjectsError };
+        }
+      }
+
+      // Note: Supabase doesn't allow users to delete their own accounts directly
+      // This would typically require a server-side function or admin action
+      // For now, we'll return an error indicating this limitation
+      return { 
+        error: new Error('Account deletion requires contacting support. Your projects have been deleted.') 
+      };
+    } catch (error) {
+      return { error };
+    }
+  };
+
   const value = {
     session,
     user,
@@ -91,6 +118,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     resetPassword,
     updatePassword,
     signOut,
+    deleteAccount,
     loading,
   };
 

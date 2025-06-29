@@ -11,7 +11,10 @@ interface Project {
   user_id: string;
   contact_method?: 'email' | 'phone' | 'discord';
   contact_info?: string;
+  contact_name?: string;
   ideal_teammate?: string[];
+  collaboration_preference?: 'remote' | 'in-person' | 'flexible';
+  location?: string;
 }
 
 type ProjectUpdate = Omit<Project, 'created_at' | 'updated_at'>;
@@ -21,7 +24,10 @@ type ProjectCreate = {
   skills: string[];
   contact_method?: 'email' | 'phone' | 'discord';
   contact_info?: string;
+  contact_name?: string;
   ideal_teammate?: string[];
+  collaboration_preference?: 'remote' | 'in-person' | 'flexible';
+  location?: string;
 };
 
 interface ProjectFormCreateProps {
@@ -54,7 +60,10 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [contactMethod, setContactMethod] = useState<'email' | 'phone' | 'discord' | ''>('');
   const [contactInfo, setContactInfo] = useState('');
+  const [contactName, setContactName] = useState('');
   const [idealTeammate, setIdealTeammate] = useState<string[]>([]);
+  const [collaborationPreference, setCollaborationPreference] = useState<'remote' | 'in-person' | 'flexible' | ''>('');
+  const [location, setLocation] = useState('');
   const [currentRequirement, setCurrentRequirement] = useState('');
   const [showCustomSkillInput, setShowCustomSkillInput] = useState(false);
   const [customSkill, setCustomSkill] = useState('');
@@ -107,7 +116,10 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
       setSelectedSkills(initialData.skills);
       setContactMethod((initialData.contact_method || '') as any);
       setContactInfo(initialData.contact_info || '');
+      setContactName(initialData.contact_name || '');
       setIdealTeammate(initialData.ideal_teammate || []);
+      setCollaborationPreference((initialData.collaboration_preference || '') as any);
+      setLocation(initialData.location || '');
     } else {
       resetForm();
     }
@@ -119,7 +131,10 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
     setSelectedSkills([]);
     setContactMethod('');
     setContactInfo('');
+    setContactName('');
     setIdealTeammate([]);
+    setCollaborationPreference('');
+    setLocation('');
     setCurrentRequirement('');
     setShowCustomSkillInput(false);
     setCustomSkill('');
@@ -173,9 +188,12 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
           contact_method: contactMethod,
           contact_info: contactInfo.trim(),
         }),
+      ...(contactName.trim() && { contact_name: contactName.trim() }),
       ...(idealTeammate.length > 0 && {
         ideal_teammate: idealTeammate,
       }),
+      ...(collaborationPreference && { collaboration_preference: collaborationPreference }),
+      ...(location.trim() && { location: location.trim() }),
     };
 
     // If editing an existing project, include the id and user_id
@@ -558,6 +576,17 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
               </div>
             </div>
 
+            {/* Contact Name Input */}
+            <div>
+              <input
+                type="text"
+                value={contactName}
+                onChange={e => setContactName(e.target.value)}
+                placeholder="Your name (optional)"
+                className="block w-full px-3 py-2 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:border-transparent focus:ring-2 focus:ring-neon-500 transition-all duration-200"
+              />
+            </div>
+
             {/* Contact Info Input */}
             {contactMethod && (
               <div>
@@ -582,6 +611,86 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
             )}
 
             {errors.contact && <p className="mt-1 text-sm text-red-600">{errors.contact}</p>}
+          </div>
+
+          {/* Collaboration Preference */}
+          <div>
+            <label className="block text-sm font-medium text-midnight-700 mb-1">
+              Collaboration Preference
+            </label>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setCollaborationPreference('remote')}
+                className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                  collaborationPreference === 'remote'
+                    ? 'border-neon-500 bg-neon-50 text-neon-700'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                Remote
+              </button>
+              <button
+                type="button"
+                onClick={() => setCollaborationPreference('in-person')}
+                className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                  collaborationPreference === 'in-person'
+                    ? 'border-neon-500 bg-neon-50 text-neon-700'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                In-person
+              </button>
+              <button
+                type="button"
+                onClick={() => setCollaborationPreference('flexible')}
+                className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                  collaborationPreference === 'flexible'
+                    ? 'border-neon-500 bg-neon-50 text-neon-700'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                Flexible
+              </button>
+            </div>
+          </div>
+
+          {/* Location */}
+          <div>
+            <label className="block text-sm font-medium text-midnight-700 mb-1">
+              Location
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+              </span>
+              <input
+                type="text"
+                value={location}
+                onChange={e => setLocation(e.target.value)}
+                placeholder="City, State/Country (optional)"
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:border-transparent focus:ring-2 focus:ring-neon-500 transition-all duration-200"
+              />
+            </div>
           </div>
         </div>
       </form>

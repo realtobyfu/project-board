@@ -11,7 +11,12 @@ interface Project {
   user_id: string;
   contact_method?: 'email' | 'phone' | 'discord';
   contact_info?: string;
+  contact_name?: string;
   ideal_teammate?: string[];
+  collaboration_preference?: 'remote' | 'in-person' | 'flexible';
+  location?: string;
+  status?: 'active' | 'archived';
+  archived_at?: string;
 }
 
 const router = Router();
@@ -20,11 +25,20 @@ const router = Router();
 router.get('/', async (req: Request, res: Response) => {
   try {
     console.log('GET /api/projects - Fetching all projects');
+    const userId = req.query.userId as string | undefined;
 
-    const { data, error } = await supabase
-      .from('projects')
-      .select('*')
-      .order('created_at', { ascending: false });
+    // Build query based on whether user is logged in
+    let query = supabase.from('projects').select('*');
+    
+    if (userId) {
+      // If user is logged in, show active projects and their own archived projects
+      query = query.or(`status.eq.active,and(status.eq.archived,user_id.eq.${userId})`);
+    } else {
+      // If not logged in, only show active projects
+      query = query.eq('status', 'active');
+    }
+    
+    const { data, error } = await query.order('created_at', { ascending: false });
 
     if (error) {
       console.error('Error fetching projects:', error);
@@ -78,7 +92,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 // POST /api/projects - Create a new project
 router.post('/', async (req: Request, res: Response) => {
   try {
-    const { title, description, skills, userId, contact_method, contact_info, ideal_teammate } = req.body;
+    const { title, description, skills, userId, contact_method, contact_info, contact_name, ideal_teammate, collaboration_preference, location } = req.body;
 
     // Validate input
     if (!title || !description || !Array.isArray(skills) || !userId) {
@@ -101,6 +115,13 @@ router.post('/', async (req: Request, res: Response) => {
       });
     }
 
+    // Validate collaboration preference if provided
+    if (collaboration_preference && !['remote', 'in-person', 'flexible'].includes(collaboration_preference)) {
+      return res.status(400).json({
+        error: 'Invalid collaboration preference. Must be remote, in-person, or flexible',
+      });
+    }
+
     // Insert new project into Supabase
     const { data, error } = await supabase
       .from('projects')
@@ -110,13 +131,17 @@ router.post('/', async (req: Request, res: Response) => {
           description,
           skills,
           user_id: userId,
+          status: 'active',
           ...(contact_method && contact_info && {
             contact_method,
             contact_info,
           }),
+          ...(contact_name && { contact_name }),
           ...(ideal_teammate && Array.isArray(ideal_teammate) && {
             ideal_teammate,
           }),
+          ...(collaboration_preference && { collaboration_preference }),
+          ...(location && { location }),
         },
       ])
       .select()
@@ -138,7 +163,7 @@ router.post('/', async (req: Request, res: Response) => {
 router.put('/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { title, description, skills, userId, contact_method, contact_info, ideal_teammate } = req.body;
+    const { title, description, skills, userId, contact_method, contact_info, contact_name, ideal_teammate, collaboration_preference, location } = req.body;
 
     // Validate input
     if (!title || !description || !Array.isArray(skills) || !userId) {
@@ -158,6 +183,13 @@ router.put('/:id', async (req: Request, res: Response) => {
     if (contact_method && !contact_info) {
       return res.status(400).json({
         error: 'Contact info is required when contact method is provided',
+      });
+    }
+
+    // Validate collaboration preference if provided
+    if (collaboration_preference && !['remote', 'in-person', 'flexible'].includes(collaboration_preference)) {
+      return res.status(400).json({
+        error: 'Invalid collaboration preference. Must be remote, in-person, or flexible',
       });
     }
 
@@ -191,9 +223,12 @@ router.put('/:id', async (req: Request, res: Response) => {
           contact_method,
           contact_info,
         }),
+        ...(contact_name && { contact_name }),
         ...(ideal_teammate && Array.isArray(ideal_teammate) && {
           ideal_teammate,
         }),
+        ...(collaboration_preference && { collaboration_preference }),
+        ...(location && { location }),
       })
       .eq('id', id)
       .select()
@@ -251,6 +286,64 @@ router.delete('/:id', async (req: Request, res: Response) => {
     res.status(204).end();
   } catch (error) {
     console.error('Error in DELETE /api/projects/:id:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// PATCH /api/projects/:id/archive - Toggle archive status
+router.patch('/:id/archive', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { userId, archive } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID is required' });
+    }
+
+    // First check if the project exists and belongs to the user
+    const { data: existingProject, error: fetchError } = await supabase
+      .from('projects')
+      .select('user_id, status')
+      .eq('id', id)
+      .single();
+
+    if (fetchError) {
+      if (fetchError.code === 'PGRST116') {
+        return res.status(404).json({ error: 'Project not found' });
+      }
+      console.error('Error fetching project:', fetchError);
+      return res.status(500).json({ error: 'Failed to fetch project' });
+    }
+
+    if (existingProject.user_id !== userId) {
+      return res.status(403).json({ error: 'You do not have permission to archive this project' });
+    }
+
+    // Toggle the archive status
+    const newStatus = archive ? 'archived' : 'active';
+    const updateData: any = { status: newStatus };
+    
+    if (archive) {
+      updateData.archived_at = new Date().toISOString();
+    } else {
+      updateData.archived_at = null;
+    }
+
+    const { data, error } = await supabase
+      .from('projects')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating project status:', error);
+      return res.status(500).json({ error: 'Failed to update project status' });
+    }
+
+    res.status(200).json(data);
+  } catch (error) {
+    console.error('Error in PATCH /api/projects/:id/archive:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });
